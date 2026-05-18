@@ -6,6 +6,9 @@ interface AuthState {
   loading: boolean;
   refetch: () => Promise<void>;
   logout: () => Promise<void>;
+  /** Increment to force Feed remount/refetch after actions like create post. */
+  feedRefreshTrigger: number;
+  bumpFeed: () => void;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -13,6 +16,11 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CurrentUserResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [feedRefreshTrigger, setFeedRefreshTrigger] = useState(0);
+
+  const bumpFeed = useCallback(() => {
+    setFeedRefreshTrigger((n) => n + 1);
+  }, []);
 
   const refetch = useCallback(async () => {
     try {
@@ -51,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, refetch, logout }}>
+    <AuthContext.Provider value={{ user, loading, refetch, logout, feedRefreshTrigger, bumpFeed }}>
       {children}
     </AuthContext.Provider>
   );

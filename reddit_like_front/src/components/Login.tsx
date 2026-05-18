@@ -9,9 +9,10 @@ import { Alert, AlertDescription } from "./ui/alert";
 interface LoginProps {
   onSwitchToRegister?: () => void;
   onLoginSuccess?: () => void;
+  onRequireEmailVerification?: () => void;
 }
 
-export function Login({ onSwitchToRegister, onLoginSuccess }: LoginProps) {
+export function Login({ onSwitchToRegister, onLoginSuccess, onRequireEmailVerification }: LoginProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -38,9 +39,15 @@ export function Login({ onSwitchToRegister, onLoginSuccess }: LoginProps) {
         setTimeout(() => {
           onLoginSuccess?.();
         }, 1000);
-      } else {
-        setError(response.message || "Please verify your email to complete login.");
+        return;
       }
+
+      if (onRequireEmailVerification) {
+        onRequireEmailVerification();
+        return;
+      }
+
+      setError(response.message || "Please verify your email to complete login.");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || "Login failed");

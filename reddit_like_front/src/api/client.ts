@@ -18,6 +18,22 @@ export interface GetPostsResponse {
   total: number;
 }
 
+export type PostSortBy = "created_at" | "likes" | "comments";
+export type SortOrder = "asc" | "desc";
+
+export interface GetPostsParams {
+  limit?: number;
+  offset?: number;
+  q?: string;
+  thread?: string;
+  author?: string;
+  has_media?: boolean;
+  sort_by?: PostSortBy;
+  sort_order?: SortOrder;
+  date_from?: string;
+  date_to?: string;
+}
+
 export interface RegisterUserRequest {
   username: string;
   email: string;
@@ -78,6 +94,18 @@ export interface LogoutUserResponse {
   message: string;
 }
 
+export interface NewsItem {
+  title: string;
+  url: string;
+  source: string;
+  publishedAt: string;
+}
+
+export interface TopNewsResponse {
+  items: NewsItem[];
+  total: number;
+}
+
 export interface CreatePostRequest {
   thread: string;
   title: string;
@@ -124,8 +152,32 @@ const handleResponse = async (response: Response) => {
 };
 
 export const apiClient = {
-  async getPosts(limit: number = 10, offset: number = 0): Promise<GetPostsResponse> {
-    const url = `${API_BASE_URL}/api/v1/post/posts?limit=${limit}&offset=${offset}`;
+  async getTopNews(params: { query?: string; pageSize?: number } = {}): Promise<TopNewsResponse> {
+    const url = new URL(`${API_BASE_URL}/api/v1/news/top`);
+    if (params.query) url.searchParams.set("query", params.query);
+    if (typeof params.pageSize === "number") url.searchParams.set("page_size", String(params.pageSize));
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    return handleResponse(response);
+  },
+
+  async getPosts(params: GetPostsParams = {}): Promise<GetPostsResponse> {
+    const limit = params.limit ?? 10;
+    const offset = params.offset ?? 0;
+    const url = new URL(`${API_BASE_URL}/api/v1/post/posts`);
+    url.searchParams.set("limit", String(limit));
+    url.searchParams.set("offset", String(offset));
+    if (params.q) url.searchParams.set("q", params.q);
+    if (params.thread) url.searchParams.set("thread", params.thread);
+    if (params.author) url.searchParams.set("author", params.author);
+    if (typeof params.has_media === "boolean") url.searchParams.set("has_media", String(params.has_media));
+    if (params.sort_by) url.searchParams.set("sort_by", params.sort_by);
+    if (params.sort_order) url.searchParams.set("sort_order", params.sort_order);
+    if (params.date_from) url.searchParams.set("date_from", params.date_from);
+    if (params.date_to) url.searchParams.set("date_to", params.date_to);
     const response = await fetch(url, {
       method: "GET",
       headers: { "Content-Type": "application/json" },

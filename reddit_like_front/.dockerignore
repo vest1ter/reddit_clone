@@ -1,0 +1,14 @@
+node_modules
+build
+.git
+*.md
+.env
+.env.*
+coverage
+playwright-report
+test-results
+e2e
+*.test.tsx
+*.test.ts
+.vscode
+.idea

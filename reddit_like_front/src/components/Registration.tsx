@@ -10,11 +10,12 @@ import { apiClient, ApiError } from "../api/client";
 interface RegistrationProps {
   onSwitchToLogin?: () => void;
   onRegistrationSuccess?: () => void;
+  onRequireEmailVerification?: (email: string) => void;
 }
 
 type Step = "form" | "verify";
 
-export function Registration({ onSwitchToLogin, onRegistrationSuccess }: RegistrationProps) {
+export function Registration({ onSwitchToLogin, onRegistrationSuccess, onRequireEmailVerification }: RegistrationProps) {
   const [formData, setFormData] = useState({
     email: "",
     username: "",
@@ -41,12 +42,23 @@ export function Registration({ onSwitchToLogin, onRegistrationSuccess }: Registr
     }
     try {
       setLoading(true);
-      await apiClient.registerUser({
+      const res = await apiClient.registerUser({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         repeat_password: formData.confirmPassword,
       });
+
+      if (res.confirmed) {
+        onRegistrationSuccess?.();
+        return;
+      }
+
+      if (onRequireEmailVerification) {
+        onRequireEmailVerification(formData.email);
+        return;
+      }
+
       setStep("verify");
       setCodeSent(false);
       setVerifyCode("");
