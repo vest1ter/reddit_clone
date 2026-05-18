@@ -8,7 +8,7 @@
     test: {
       environment: "jsdom",
       globals: false,
-      setupFiles: "./src/test/setup.ts",
+      setupFiles: "./src/setupTests.ts",
       exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**", "**/build/**"],
     },
     resolve: {

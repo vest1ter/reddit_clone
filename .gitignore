@@ -278,6 +278,8 @@ temp/
 *testingdir
 *testingfile
 *testingfiles
+# Vitest setup (path must not end with /test — blocked by *test above)
+!reddit_like_front/src/setupTests.ts
 *temp
 *tempdir
 *tempfile
